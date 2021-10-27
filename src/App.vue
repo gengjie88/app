@@ -176,7 +176,7 @@
             <el-form-item label="最近数据的颜色">
               <el-color-picker v-model="color[num-item+1]" size="mini" v-for="item of (num)" :key="item"></el-color-picker>
             </el-form-item>
-            <el-form-item label="其他数据的颜色">
+            <el-form-item label="剩余数据的颜色">
               <el-color-picker v-model="color[0]" size="mini" ></el-color-picker>
             </el-form-item>
           </el-form>
@@ -322,7 +322,7 @@ export default {
           tags: ["data\\tag1", "data\\tag2"],
           stime: t[0],
           etime: t[1],
-          count: 10,
+          count: this.numMax,
         },
         contentType: "application/x-www-form-urlencoded",
       }).then((res) => {
@@ -527,7 +527,7 @@ export default {
         },
         series: [
           {
-            symbolSize: 10,
+            symbolSize: this.size,
             data: this.dataArr,
             type: "scatter",
             itemStyle: {
