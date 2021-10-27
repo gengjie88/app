@@ -173,11 +173,23 @@
                 :min="1"
               ></el-input-number>
             </el-form-item>
-            <el-form-item label="最近数据的颜色">
-              <el-color-picker v-model="color[num-item+1]" size="mini" v-for="item of (num)" :key="item"></el-color-picker>
-            </el-form-item>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="从最远点开始设置3-2-1"
+              placement="top-start"
+            >
+              <el-form-item label="最近数据的颜色">
+                <el-color-picker
+                  v-model="color[num - item + 1]"
+                  size="mini"
+                  v-for="item of num"
+                  :key="item"
+                ></el-color-picker>
+              </el-form-item>
+            </el-tooltip>
             <el-form-item label="剩余数据的颜色">
-              <el-color-picker v-model="color[0]" size="mini" ></el-color-picker>
+              <el-color-picker v-model="color[0]" size="mini"></el-color-picker>
             </el-form-item>
           </el-form>
 
@@ -305,10 +317,10 @@ export default {
       action: 1, //存放历史还是实时的数据的标记，0历史1实时
       id: 0, //存放定时器的id
       dialogVisible: false, //dialog的开闭状态
-      numMax: 100, //散点图展示点的个数
-      size: 5, //散点图转世点的大小
-      color:[], //散点图展示点的颜色
-      num: 10, //最近数据点个数
+      numMax: 50, //散点图展示点的个数
+      size: 10, //散点图转世点的大小
+      color: [], //散点图展示点的颜色
+      num: 3, //最近数据点个数
     };
   },
   methods: {
@@ -513,7 +525,7 @@ export default {
         myChart = echarts.init(document.getElementById("myChart"));
       }
       var that = this;
-      // that.color = that.color.reverse()
+
       var option = {
         xAxis: {
           min: 0,
@@ -534,10 +546,11 @@ export default {
               normal: {
                 color: function(params) {
                   let colorList = that.color;
-                  if (colorList.length <= params.dataIndex) {
+                  console.log(params.dataIndex, "index");
+                  if (colorList.length <= params.dataIndex + 1) {
                     return colorList[length];
                   }
-                  return colorList[params.dataIndex];
+                  return colorList[params.dataIndex + 1];
                 },
               },
             },
