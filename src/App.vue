@@ -319,7 +319,7 @@ export default {
       dialogVisible: false, //dialog的开闭状态
       numMax: 50, //散点图展示点的个数
       size: 10, //散点图转世点的大小
-      color: [], //散点图展示点的颜色
+      color: ["#000000", "#FF0000", "#FFEA00", "#0040FF"], //散点图展示点的默认颜色
       num: 3, //最近数据点个数
     };
   },
