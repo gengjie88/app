@@ -200,7 +200,7 @@
             >
           </span>
         </el-dialog>
-        {{ numMax }}{{ size }}{{ color }}
+        {{dataArr}}
       </div>
       <div id="contentRight">
         <div id="rightTop">
@@ -352,7 +352,13 @@ export default {
           ])
           .then((res) => {
             console.log(res);
-            this.dataArr.unshift(res.data);
+            if(this.dataArr.length < this.numMax){
+              this.dataArr.unshift(res.data);//最新数据放到最前面
+            }else if(this.dataArr.length === this.numMax){
+              this.dataArr.pop();
+              this.dataArr.unshift(res.data);
+            }
+            
             this.drawRing1();
           });
       }, 1000);
