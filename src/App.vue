@@ -57,20 +57,20 @@
               highlight-current-row
             >
               <el-table-column
-                prop="date"
+                prop="col1"
                 label="贡献度"
                 width="150"
                 align="center"
               >
               </el-table-column>
               <el-table-column
-                prop="name"
+                prop="col2"
                 label="当前值"
                 width="150"
                 align="center"
               >
               </el-table-column>
-              <el-table-column prop="address" label="描述" align="center">
+              <el-table-column prop="col3" label="描述" align="center">
               </el-table-column>
             </el-table>
           </div>
@@ -131,8 +131,12 @@
         >
         </el-date-picker
         ><br />
-        <el-button @click="test2()" size="small" round>切换实时</el-button>
-        <el-button @click="test1()" size="small" round>查询历史</el-button>
+        <el-button @click="findCurData()" size="small" round
+          >切换实时</el-button
+        >
+        <el-button @click="findHisData()" size="small" round
+          >查询历史</el-button
+        >
         <el-button
           type="primary"
           icon="el-icon-s-tools"
@@ -181,15 +185,20 @@
             >
               <el-form-item label="最近数据的颜色">
                 <el-color-picker
-                  v-model="color[num - item + 1]"
+                  v-model="color[item]"
                   size="mini"
                   v-for="item of num"
                   :key="item"
+                  show-alpha
                 ></el-color-picker>
               </el-form-item>
             </el-tooltip>
             <el-form-item label="剩余数据的颜色">
-              <el-color-picker v-model="color[0]" size="mini"></el-color-picker>
+              <el-color-picker
+                v-model="color[0]"
+                size="mini"
+                show-alpha
+              ></el-color-picker>
             </el-form-item>
           </el-form>
 
@@ -200,7 +209,7 @@
             >
           </span>
         </el-dialog>
-        {{dataArr}}
+        {{ this.color }}
       </div>
       <div id="contentRight">
         <div id="rightTop">
@@ -276,57 +285,28 @@ export default {
       wdzs: 0, //稳定指数
       gaugeName: "稳定指数", //仪表盘名称
       tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
+        
       ],
       // value1: [new Date().getTime(),new Date().getTime()],
       value1: [1635149533545, 1635149566545],
       action: 1, //存放历史还是实时的数据的标记，0历史1实时
-      id: 0, //存放定时器的id
+      id: 0,
+      id1: 0,
+      id2: 0,
+      id3:0, //存放定时器的id
       dialogVisible: false, //dialog的开闭状态
       numMax: 50, //散点图展示点的个数
       size: 10, //散点图转世点的大小
-      color: ["#000000", "#FF0000", "#FFEA00", "#0040FF"], //散点图展示点的默认颜色
+      color: ["rgba(128, 128, 128, 0.7)", "rgba(255, 0, 0, 1)", "rgba(255, 242, 0, 1)", "rgba(25, 5, 247, 1)"], //散点图展示点的默认颜色
       num: 3, //最近数据点个数
     };
   },
   methods: {
-    test1() {
+    scatterHis() {
       let t = this.value1; //获取到timepicker的值
-      clearInterval(this.id);
+      if (this.id !== 0) {
+        clearInterval(this.id); //如果定时器存在则清除定时器
+      }
       axios({
         method: "post",
         url: "http://10.22.104.89:49823/api/DbComm/GetHisData",
@@ -339,10 +319,34 @@ export default {
         contentType: "application/x-www-form-urlencoded",
       }).then((res) => {
         this.dataArr = this.dataFormat(res.data);
-        this.drawRing1();
+        this.drawScatter();
       });
-    },
-    test2() {
+    }, //获取散点图历史数据并进行绘制
+
+    lineHis() {
+      let t = this.value1; //获取到timepicker的值
+      if (this.id1 !== 0) {
+        clearInterval(this.id1); //如果定时器存在则清除定时器
+      }
+      axios({
+        method: "post",
+        url: "http://10.22.104.89:49823/api/DbComm/GetHisData",
+        data: {
+          tags: ["data\\tag1", "data\\tag2"],
+          stime: t[0],
+          etime: t[1],
+          count: 7,
+        },
+        contentType: "application/x-www-form-urlencoded",
+      }).then((res) => {
+        this.data1 = res.data[0];
+        this.data2 = res.data[1];
+        this.drawLine1();
+        this.drawLine2();
+      });
+    }, //获取折线图历史数据并进行绘制
+
+    scatterCur() {
       this.dataArr = [];
       this.id = setInterval(() => {
         axios
@@ -351,17 +355,94 @@ export default {
             "data\\tag2",
           ])
           .then((res) => {
-            console.log(res);
-            if(this.dataArr.length < this.numMax){
-              this.dataArr.unshift(res.data);//最新数据放到最前面
-            }else if(this.dataArr.length === this.numMax){
-              this.dataArr.pop();
-              this.dataArr.unshift(res.data);
+            // console.log(res);
+            if (this.dataArr.length < this.numMax) {
+              this.dataArr.push(res.data); //最新数据放到最前面
+            } else if (this.dataArr.length === this.numMax) {
+              this.dataArr.shift();
+              this.dataArr.push(res.data);
             }
-            
-            this.drawRing1();
+
+            this.drawScatter();
           });
       }, 1000);
+    }, //获取散点图实时数据并进行绘制
+
+    lineCur() {
+      this.data1 = [];
+      this.data2 = [];
+      this.id1 = setInterval(() => {
+        axios
+          .post("http://10.22.104.89:49823/api/DbComm/GetData", [
+            "data\\tag1",
+            "data\\tag2",
+          ])
+          .then((res) => {
+            if (this.data1.length < 7) {
+              this.data1.push(res.data[0]);
+              this.data2.push(res.data[1]);
+            }
+            if (this.data1.length == 7) {
+              this.data1.shift();
+              this.data1.push(res.data[0]);
+              this.data2.shift();
+              this.data2.push(res.data[1]);
+            }
+            this.drawLine1();
+            this.drawLine2();
+          });
+      }, 1000);
+    }, //获取折线图实时数据并进行绘制
+    gaugeHis() {
+      // this.gkmszs = 0,
+      // this.yjsj = 0,
+      // this.wdzs = 0,
+    }, //获取仪表盘的历史数据并进行绘制
+    gaugeCur() {
+      this.id2 = setInterval(() => {
+        axios
+          .post("http://10.22.104.89:49823/api/DbComm/GetData", [
+            "data\\tag1",
+            "data\\tag2",
+            "data\\tag3",
+          ])
+          .then((res) => {
+            // console.log(res);
+            this.gkmszs = res.data[0];
+            this.yjsj = res.data[1];
+            this.wdzs = res.data[2];
+            this.drawGauge1();
+            this.drawGauge2();
+            this.drawGauge3();
+          });
+      }, 1000);
+      axios;
+    }, //获取仪表盘的实时数据并进行绘制
+    tableCur(){
+      this.id3 = setInterval(()=>{
+        axios
+          .post("http://10.22.104.89:49823/api/DbComm/GetData", [
+            "data\\tag1.Name",
+            "data\\tag1.PV",
+            "data\\tag1.DESC",
+          ])
+          .then((res) => {
+            console.log(res);
+            
+          });
+      },1000)
+    },//获取表格数据
+    findHisData() {
+      //查询页面中的所有历史数据
+      this.lineHis();
+      this.scatterHis();
+    },
+    findCurData() {
+      //查询页面中所有的实时数据
+      this.scatterCur();
+      this.lineCur();
+      this.gaugeCur();
+      // this.tableCur()
     },
     dataFormat(arr) {
       //将后台取到的数据进行处理
@@ -488,26 +569,45 @@ export default {
         ],
       };
       var option2 = {
-        tooltip: {
-          formatter: "{a} <br/>{b} : {c}%",
-        },
         series: [
           {
-            name: "Pressure",
             type: "gauge",
-            progress: {
-              show: true,
+            axisLine: {
+              lineStyle: {
+                width: 10,
+                color: [
+                  [0.3, "#67e0e3"],
+                  [0.7, "#37a2da"],
+                  [1, "#fd666d"],
+                ],
+              },
+            },
+            pointer: {
+              itemStyle: {
+                color: "auto",
+              },
+            },
+            splitLine: {
+              show: false,
+              distance: -30,
+              length: 3,
+              lineStyle: {
+                color: "#fff",
+                width: 2,
+              },
+            },
+            axisLabel: {
+              color: "auto",
+              distance: 10,
+              fontSize: 10,
             },
             detail: {
               valueAnimation: true,
-              formatter: "{value}",
+              formatter: "{value} ",
+              color: "auto",
+              fontSize: 20,
             },
-            data: [
-              {
-                value: this.wdzs,
-                name: this.gaugeName,
-              },
-            ],
+            data: [{ value: this.gkmszs }],
           },
         ],
       };
@@ -522,7 +622,7 @@ export default {
       myChart5.setOption(option2);
     }, //初始化图表
 
-    drawRing1() {
+    drawScatter() {
       //对散点图进行重新绘制
       let myChart = echarts.getInstanceByDom(
         document.getElementById("myChart")
@@ -536,12 +636,12 @@ export default {
         xAxis: {
           min: 0,
           max: 100,
-          show: false,
+          show: true,
         },
         yAxis: {
           min: 0,
           max: 100,
-          show: false,
+          show: true  ,
         },
         series: [
           {
@@ -552,14 +652,318 @@ export default {
               normal: {
                 color: function(params) {
                   let colorList = that.color;
-                  console.log(params.dataIndex, "index");
-                  if (colorList.length <= params.dataIndex + 1) {
-                    return colorList[length];
+                  // console.log(params.dataIndex, "index");
+                  console.log(colorList.length=== that.color.length)
+                  if(params.dataIndex>that.dataArr.length-colorList.length){
+                    console.log(that.dataArr.lengt-params.dataIndex,'ddd')
+                    return colorList[that.dataArr.length-params.dataIndex];
                   }
-                  return colorList[params.dataIndex + 1];
+                  return colorList[0];
+                  // if (colorList.length <= params.dataIndex + 1) {
+                  //   return colorList[length];
+                  // }
+                  // return colorList[params.dataIndex + 1];
                 },
               },
             },
+          },
+        ],
+      };
+      myChart.setOption(option, true);
+    },
+    drawLine1() {
+      let myChart = echarts.getInstanceByDom(document.getElementById("zhutu1"));
+      if (myChart == null) {
+        myChart = echarts.init(document.getElementById("zhutu1"));
+      }
+      let Max1 = this.calMax(this.data1);
+      let Min1 = this.calMin(this.data1);
+      let Max2 = this.calMax(this.data2);
+      let Min2 = this.calMin(this.data2); //用于对齐双y轴
+      var option = {
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          data: ["工况模式指数", "预警时间"],
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {},
+          },
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+
+        yAxis: [
+          {
+            type: "value",
+            name: "工况模式指数",
+            min: Min1,
+            max: Max1,
+            interval: (Max1 - Min1) / 5,
+            splitNumber: 5,
+            nameTextStyle: {
+              color: "yellow",
+            },
+          },
+          {
+            type: "value",
+            name: "预警时间",
+            min: Min2,
+            max: Max2,
+            interval: (Max2 - Min2) / 5,
+            splitNumber: 5,
+            nameTextStyle: {
+              color: "red",
+            },
+          },
+        ],
+
+        series: [
+          {
+            name: "工况模式指数",
+            type: "line",
+
+            data: this.data1,
+          },
+          {
+            name: "预警时间",
+            type: "line",
+
+            yAxisIndex: 1,
+
+            data: this.data2,
+          },
+        ],
+      };
+      myChart.setOption(option, true);
+    },
+    drawLine2() {
+      let myChart = echarts.getInstanceByDom(document.getElementById("zhutu2"));
+      if (myChart == null) {
+        myChart = echarts.init(document.getElementById("zhutu2"));
+      }
+      let Max1 = this.calMax(this.data1);
+      let Min1 = this.calMin(this.data1);
+      let Max2 = this.calMax(this.data2);
+      let Min2 = this.calMin(this.data2); //用于对齐双y轴
+      var option = {
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          data: ["工况模式指数", "预警时间"],
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {},
+          },
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+
+        yAxis: [
+          {
+            type: "value",
+            name: "工况模式指数",
+            min: Min1,
+            max: Max1,
+            interval: (Max1 - Min1) / 5,
+            splitNumber: 5,
+            nameTextStyle: {
+              color: "yellow",
+            },
+          },
+          {
+            type: "value",
+            name: "预警时间",
+            min: Min2,
+            max: Max2,
+            interval: (Max2 - Min2) / 5,
+            splitNumber: 5,
+            nameTextStyle: {
+              color: "red",
+            },
+          },
+        ],
+
+        series: [
+          {
+            name: "工况模式指数",
+            type: "line",
+
+            data: this.data1,
+          },
+          {
+            name: "预警时间",
+            type: "line",
+
+            yAxisIndex: 1,
+
+            data: this.data2,
+          },
+        ],
+      };
+      myChart.setOption(option, true);
+    },
+    drawGauge1() {
+      let myChart = echarts.getInstanceByDom(
+        document.getElementById("yibiao1")
+      );
+      if (myChart == null) {
+        myChart = echarts.init(document.getElementById("yibiao1"));
+      }
+      var option = {
+        series: [
+          {
+            type: "gauge",
+            axisLine: {
+              lineStyle: {
+                width: 10,
+                color: [
+                  [0.3, "#67e0e3"],
+                  [0.7, "#37a2da"],
+                  [1, "#fd666d"],
+                ],
+              },
+            },
+            pointer: {
+              itemStyle: {
+                color: "auto",
+              },
+            },
+            splitLine: {
+              show: false,
+              distance: -30,
+              length: 3,
+              lineStyle: {
+                color: "#fff",
+                width: 2,
+              },
+            },
+            axisLabel: {
+              color: "auto",
+              distance: 10,
+              fontSize: 10,
+            },
+            detail: {
+              valueAnimation: true,
+              formatter: "{value}\n工况模式指数",
+              color: "auto",
+              fontSize: 10,
+            },
+            data: [{ value: this.gkmszs }],
+          },
+        ],
+      };
+      myChart.setOption(option, true);
+    },
+    drawGauge2() {
+      let myChart = echarts.getInstanceByDom(
+        document.getElementById("yibiao2")
+      );
+      if (myChart == null) {
+        myChart = echarts.init(document.getElementById("yibiao2"));
+      }
+      var option = {
+        series: [
+          {
+            type: "gauge",
+            axisLine: {
+              lineStyle: {
+                width: 10,
+                color: [
+                  [0.3, "#67e0e3"],
+                  [0.7, "#37a2da"],
+                  [1, "#fd666d"],
+                ],
+              },
+            },
+            pointer: {
+              itemStyle: {
+                color: "auto",
+              },
+            },
+            splitLine: {
+              show: false,
+              distance: -30,
+              length: 3,
+              lineStyle: {
+                color: "#fff",
+                width: 2,
+              },
+            },
+            axisLabel: {
+              color: "auto",
+              distance: 10,
+              fontSize: 10,
+            },
+            detail: {
+              valueAnimation: true,
+              formatter: "{value}\n稳定指数",
+              color: "auto",
+              fontSize: 10,
+            },
+            data: [{ value: this.wdzs }],
+          },
+        ],
+      };
+      myChart.setOption(option, true);
+    },
+    drawGauge3() {
+      let myChart = echarts.getInstanceByDom(
+        document.getElementById("yibiao3")
+      );
+      if (myChart == null) {
+        myChart = echarts.init(document.getElementById("yibiao3"));
+      }
+      var option = {
+        series: [
+          {
+            type: "gauge",
+            axisLine: {
+              lineStyle: {
+                width: 10,
+                color: [
+                  [0.3, "#67e0e3"],
+                  [0.7, "#37a2da"],
+                  [1, "#fd666d"],
+                ],
+              },
+            },
+            pointer: {
+              itemStyle: {
+                color: "auto",
+              },
+            },
+            splitLine: {
+              show: false,
+              distance: -30,
+              length: 3,
+              lineStyle: {
+                color: "#fff",
+                width: 2,
+              },
+            },
+            axisLabel: {
+              color: "auto",
+              distance: 10,
+              fontSize: 10,
+            },
+            detail: {
+              valueAnimation: true,
+              formatter: "{value}\n预警指数",
+              color: "auto",
+              fontSize: 10,
+            },
+            data: [{ value: this.yjsj }],
           },
         ],
       };
@@ -578,30 +982,6 @@ export default {
   mounted() {
     //图像初始化
     this.init();
-  },
-  watch: {
-    // dataArr:{
-    //   handler:function(newval,oldval){
-    //     console.log(newval)
-    //     console.log(oldval)
-    //   }
-    // }
-    // dataArr: {
-    //   handler(newVal, oldVal) {
-    //     if (!this.myChart) {
-    //       console.log("11");
-    //       if (newVal) {
-    //         this.myChart.setOption(newVal);
-    //       } else {
-    //         this.myChart.setOption(oldVal);
-    //       }
-    //     } else {
-    //       console.log("22");
-    //       this.drawRing1();
-    //     }
-    //   },
-    //   deep: true,
-    // },
   },
 };
 </script>
