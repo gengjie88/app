@@ -209,7 +209,7 @@
             >
           </span>
         </el-dialog>
-        {{ this.color }}
+        {{ this.tableData }}
       </div>
       <div id="contentRight">
         <div id="rightTop">
@@ -284,20 +284,23 @@ export default {
       yjsj: 0, //预警指数
       wdzs: 0, //稳定指数
       gaugeName: "稳定指数", //仪表盘名称
-      tableData: [
-        
-      ],
-      // value1: [new Date().getTime(),new Date().getTime()],
-      value1: [1635149533545, 1635149566545],
+      tableData: [],
+      value1: [new Date().getTime(), new Date().getTime()],
+      // value1: [1635149533545, 1635149566545],
       action: 1, //存放历史还是实时的数据的标记，0历史1实时
       id: 0,
       id1: 0,
       id2: 0,
-      id3:0, //存放定时器的id
+      id3: 0, //存放定时器的id
       dialogVisible: false, //dialog的开闭状态
       numMax: 50, //散点图展示点的个数
       size: 10, //散点图转世点的大小
-      color: ["rgba(128, 128, 128, 0.7)", "rgba(255, 0, 0, 1)", "rgba(255, 242, 0, 1)", "rgba(25, 5, 247, 1)"], //散点图展示点的默认颜色
+      color: [
+        "rgba(128, 128, 128, 0.7)",
+        "rgba(255, 0, 0, 1)",
+        "rgba(255, 242, 0, 1)",
+        "rgba(25, 5, 247, 1)",
+      ], //散点图展示点的默认颜色
       num: 3, //最近数据点个数
     };
   },
@@ -318,7 +321,7 @@ export default {
         },
         contentType: "application/x-www-form-urlencoded",
       }).then((res) => {
-        this.dataArr = this.dataFormat(res.data);
+        this.dataArr = this.scatterDataFormat(res.data);
         this.drawScatter();
       });
     }, //获取散点图历史数据并进行绘制
@@ -355,7 +358,6 @@ export default {
             "data\\tag2",
           ])
           .then((res) => {
-            // console.log(res);
             if (this.dataArr.length < this.numMax) {
               this.dataArr.push(res.data); //最新数据放到最前面
             } else if (this.dataArr.length === this.numMax) {
@@ -394,9 +396,28 @@ export default {
       }, 1000);
     }, //获取折线图实时数据并进行绘制
     gaugeHis() {
-      // this.gkmszs = 0,
-      // this.yjsj = 0,
-      // this.wdzs = 0,
+      let t = this.value1; //获取到timepicker的值
+      if (this.id2 !== 0) {
+        clearInterval(this.id2); //如果定时器存在则清除定时器
+      }
+      axios({
+        method: "post",
+        url: "http://10.22.104.89:49823/api/DbComm/GetHisData",
+        data: {
+          tags: ["data\\tag1", "data\\tag2", "data\\tag3"],
+          stime: t[1],
+          etime: t[1],
+          count: 1,
+        },
+        contentType: "application/x-www-form-urlencoded",
+      }).then((res) => {
+        this.gkmszs = res.data[0];
+        this.yjsj = res.data[1];
+        this.wdzs = res.data[2];
+        this.drawGauge1();
+        this.drawGauge2();
+        this.drawGauge3();
+      });
     }, //获取仪表盘的历史数据并进行绘制
     gaugeCur() {
       this.id2 = setInterval(() => {
@@ -418,33 +439,70 @@ export default {
       }, 1000);
       axios;
     }, //获取仪表盘的实时数据并进行绘制
-    tableCur(){
-      this.id3 = setInterval(()=>{
+    tableCur() {
+      this.id3 = setInterval(() => {
         axios
           .post("http://10.22.104.89:49823/api/DbComm/GetData", [
             "data\\tag1.Name",
             "data\\tag1.PV",
             "data\\tag1.DESC",
+            "data\\tag2.Name",
+            "data\\tag2.PV",
+            "data\\tag2.DESC",
+            "data\\tag3.Name",
+            "data\\tag3.PV",
+            "data\\tag3.DESC",
           ])
           .then((res) => {
-            console.log(res);
-            
+            this.tableData = this.tableDataFormat(res.data, 0);
           });
-      },1000)
-    },//获取表格数据
+      }, 1000);
+    }, //获取表格数据
+
+    tableHis() {
+      let t = this.value1; //获取到timepicker的值
+      if (this.id3 !== 0) {
+        clearInterval(this.id3); //如果定时器存在则清除定时器
+      }
+      axios({
+        method: "post",
+        url: "http://10.22.104.89:49823/api/DbComm/GetHisData",
+        data: {
+          tags: [
+            "data\\tag1.Name",
+            "data\\tag1.PV",
+            "data\\tag1.DESC",
+            "data\\tag2.Name",
+            "data\\tag2.PV",
+            "data\\tag2.DESC",
+            "data\\tag3.Name",
+            "data\\tag3.PV",
+            "data\\tag3.DESC",
+          ],
+          stime: t[0],
+          etime: t[1],
+          count: 10,
+        },
+        contentType: "application/x-www-form-urlencoded",
+      }).then((res) => {
+        this.tableData = this.tableDataFormat(res.data, 1);
+      });
+    }, //获取表格历史数据
     findHisData() {
       //查询页面中的所有历史数据
       this.lineHis();
       this.scatterHis();
+      this.gaugeHis();
+      this.tableHis();
     },
     findCurData() {
       //查询页面中所有的实时数据
       this.scatterCur();
       this.lineCur();
       this.gaugeCur();
-      // this.tableCur()
+      this.tableCur();
     },
-    dataFormat(arr) {
+    scatterDataFormat(arr) {
       //将后台取到的数据进行处理
       let x = arr[0];
       let y = arr[1];
@@ -473,7 +531,35 @@ export default {
       let minval = minint * 10; //让显示的刻度是整数
       return minval;
     }, //计算y轴最小值，用于多条y轴
+    tableDataFormat(arr, t) {
+      if (t === 0) {
+        this.tableData = [];
+        for (let o = 0; o <= arr.length; o += 3) {
+          let obj = {
+            col1: arr[o],
+            col2: arr[o + 1],
+            col3: arr[o + 2],
+          };
+          this.tableData.push(obj);
+        }
+      } else {
+        this.tableData = [];
+        let arr1 = arr[0];
+        for (let index = 0; index < arr.length; index += 3) {
+          for (let i = 0; i < arr1.length; i++) {
+            let x = {
+              col1: arr[index][i],
+              col2: arr[index + 1][i],
+              col3: arr[index + 2][i],
+            };
+            console.log(x)
+            this.tableData.push(x)
+          }
+        }
+      }
 
+      return this.tableData;
+    },
     init() {
       var myChart = echarts.init(document.getElementById("myChart"));
       var myChart1 = echarts.init(document.getElementById("zhutu1"));
@@ -584,7 +670,7 @@ export default {
             },
             pointer: {
               itemStyle: {
-                color: "auto",
+                color: "inherit",
               },
             },
             splitLine: {
@@ -597,14 +683,14 @@ export default {
               },
             },
             axisLabel: {
-              color: "auto",
+              color: "inherit",
               distance: 10,
               fontSize: 10,
             },
             detail: {
               valueAnimation: true,
               formatter: "{value} ",
-              color: "auto",
+              color: "inherit",
               fontSize: 20,
             },
             data: [{ value: this.gkmszs }],
@@ -636,12 +722,12 @@ export default {
         xAxis: {
           min: 0,
           max: 100,
-          show: true,
+          show: false,
         },
         yAxis: {
           min: 0,
           max: 100,
-          show: true  ,
+          show: false,
         },
         series: [
           {
@@ -653,10 +739,13 @@ export default {
                 color: function(params) {
                   let colorList = that.color;
                   // console.log(params.dataIndex, "index");
-                  console.log(colorList.length=== that.color.length)
-                  if(params.dataIndex>that.dataArr.length-colorList.length){
-                    console.log(that.dataArr.lengt-params.dataIndex,'ddd')
-                    return colorList[that.dataArr.length-params.dataIndex];
+                  // console.log(colorList.length=== that.color.length)
+                  if (
+                    params.dataIndex >
+                    that.dataArr.length - colorList.length
+                  ) {
+                    // console.log(that.dataArr.lengt-params.dataIndex,'ddd')
+                    return colorList[that.dataArr.length - params.dataIndex];
                   }
                   return colorList[0];
                   // if (colorList.length <= params.dataIndex + 1) {
@@ -836,7 +925,7 @@ export default {
             },
             pointer: {
               itemStyle: {
-                color: "auto",
+                color: "inherit",
               },
             },
             splitLine: {
@@ -849,14 +938,14 @@ export default {
               },
             },
             axisLabel: {
-              color: "auto",
+              color: "inherit",
               distance: 10,
               fontSize: 10,
             },
             detail: {
               valueAnimation: true,
               formatter: "{value}\n工况模式指数",
-              color: "auto",
+              color: "inherit",
               fontSize: 10,
             },
             data: [{ value: this.gkmszs }],
@@ -888,7 +977,7 @@ export default {
             },
             pointer: {
               itemStyle: {
-                color: "auto",
+                color: "inherit",
               },
             },
             splitLine: {
@@ -901,14 +990,14 @@ export default {
               },
             },
             axisLabel: {
-              color: "auto",
+              color: "inherit",
               distance: 10,
               fontSize: 10,
             },
             detail: {
               valueAnimation: true,
               formatter: "{value}\n稳定指数",
-              color: "auto",
+              color: "inherit",
               fontSize: 10,
             },
             data: [{ value: this.wdzs }],
@@ -940,7 +1029,7 @@ export default {
             },
             pointer: {
               itemStyle: {
-                color: "auto",
+                color: "inherit",
               },
             },
             splitLine: {
@@ -953,14 +1042,14 @@ export default {
               },
             },
             axisLabel: {
-              color: "auto",
+              color: "inherit",
               distance: 10,
               fontSize: 10,
             },
             detail: {
               valueAnimation: true,
               formatter: "{value}\n预警指数",
-              color: "auto",
+              color: "inherit",
               fontSize: 10,
             },
             data: [{ value: this.yjsj }],
