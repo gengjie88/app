@@ -283,10 +283,9 @@ export default {
       gkmszs: 0, //工况模式指数
       yjsj: 0, //预警指数
       wdzs: 0, //稳定指数
-      gaugeName: "稳定指数", //仪表盘名称
-      tableData: [],
-      value1: [new Date().getTime(), new Date().getTime()],
-      // value1: [1635149533545, 1635149566545],
+      // gaugeName: "稳定指数", //仪表盘名称
+      tableData: [],//表格数据
+      value1: [new Date().getTime(), new Date().getTime()],//为日期时间选择器的值
       action: 1, //存放历史还是实时的数据的标记，0历史1实时
       id: 0,
       id1: 0,
@@ -294,7 +293,7 @@ export default {
       id3: 0, //存放定时器的id
       dialogVisible: false, //dialog的开闭状态
       numMax: 50, //散点图展示点的个数
-      size: 10, //散点图转世点的大小
+      size: 10, //散点图展示点的大小
       color: [
         "rgba(128, 128, 128, 0.7)",
         "rgba(255, 0, 0, 1)",
@@ -395,6 +394,7 @@ export default {
           });
       }, 1000);
     }, //获取折线图实时数据并进行绘制
+    
     gaugeHis() {
       let t = this.value1; //获取到timepicker的值
       if (this.id2 !== 0) {
@@ -419,6 +419,7 @@ export default {
         this.drawGauge3();
       });
     }, //获取仪表盘的历史数据并进行绘制
+
     gaugeCur() {
       this.id2 = setInterval(() => {
         axios
@@ -439,6 +440,7 @@ export default {
       }, 1000);
       axios;
     }, //获取仪表盘的实时数据并进行绘制
+
     tableCur() {
       this.id3 = setInterval(() => {
         axios
@@ -469,15 +471,15 @@ export default {
         url: "http://10.22.104.89:49823/api/DbComm/GetHisData",
         data: {
           tags: [
-            "data\\tag1.Name",
+            // "data\\tag1.Name",
             "data\\tag1.PV",
-            "data\\tag1.DESC",
-            "data\\tag2.Name",
+            // "data\\tag1.DESC",
+            // "data\\tag2.Name",
             "data\\tag2.PV",
-            "data\\tag2.DESC",
-            "data\\tag3.Name",
+            // "data\\tag2.DESC",
+            // "data\\tag3.Name",
             "data\\tag3.PV",
-            "data\\tag3.DESC",
+            // "data\\tag3.DESC",
           ],
           stime: t[0],
           etime: t[1],
@@ -488,20 +490,23 @@ export default {
         this.tableData = this.tableDataFormat(res.data, 1);
       });
     }, //获取表格历史数据
+
     findHisData() {
       //查询页面中的所有历史数据
       this.lineHis();
       this.scatterHis();
       this.gaugeHis();
       this.tableHis();
-    },
+    },//查询所有历史数据
+
     findCurData() {
       //查询页面中所有的实时数据
       this.scatterCur();
       this.lineCur();
       this.gaugeCur();
       this.tableCur();
-    },
+    },//查询所有实时数据
+
     scatterDataFormat(arr) {
       //将后台取到的数据进行处理
       let x = arr[0];
@@ -513,7 +518,8 @@ export default {
         newArr.push(i);
       }
       return newArr;
-    },
+    },//用于处理散点图数据的函数
+
     calMax(arr) {
       let max = Math.max(...arr);
       let maxint = Math.ceil(max / 9.5); // 不让最高的值超过最上面的刻度
@@ -524,13 +530,15 @@ export default {
         maxval = 1;
       }
       return maxval;
-    }, //计算y轴最大值，用于多条y轴
+    }, //计算折线图y轴最大值，用于多条y轴合并
+
     calMin(arr) {
       let min = Math.min(...arr);
       let minint = Math.floor(min / 10);
       let minval = minint * 10; //让显示的刻度是整数
       return minval;
-    }, //计算y轴最小值，用于多条y轴
+    }, //计算折线图y轴最小值，用于多条y轴合并
+
     tableDataFormat(arr, t) {
       if (t === 0) {
         this.tableData = [];
@@ -545,10 +553,10 @@ export default {
       } else {
         this.tableData = [];
         let arr1 = arr[0];
-        for (let index = 0; index < arr.length; index += 3) {
+        for (let index = 0; index < arr.length; index +=3) {
           for (let i = 0; i < arr1.length; i++) {
             let x = {
-              col1: arr[index][i],
+              col1: `tag${index+1}`,
               col2: arr[index + 1][i],
               col3: arr[index + 2][i],
             };
@@ -559,7 +567,8 @@ export default {
       }
 
       return this.tableData;
-    },
+    },//用于处理表格数据的函数
+
     init() {
       var myChart = echarts.init(document.getElementById("myChart"));
       var myChart1 = echarts.init(document.getElementById("zhutu1"));
@@ -706,7 +715,7 @@ export default {
       myChart2.setOption(option2);
       myChart3.setOption(option2);
       myChart5.setOption(option2);
-    }, //初始化图表
+    }, //初始化图表，显示默认的数据
 
     drawScatter() {
       //对散点图进行重新绘制
@@ -759,7 +768,8 @@ export default {
         ],
       };
       myChart.setOption(option, true);
-    },
+    },//绘制散点图，用于更新
+
     drawLine1() {
       let myChart = echarts.getInstanceByDom(document.getElementById("zhutu1"));
       if (myChart == null) {
@@ -830,7 +840,8 @@ export default {
         ],
       };
       myChart.setOption(option, true);
-    },
+    },//绘制折线图1,用于更新
+
     drawLine2() {
       let myChart = echarts.getInstanceByDom(document.getElementById("zhutu2"));
       if (myChart == null) {
@@ -901,7 +912,8 @@ export default {
         ],
       };
       myChart.setOption(option, true);
-    },
+    },//绘制折线图2,用于更新
+
     drawGauge1() {
       let myChart = echarts.getInstanceByDom(
         document.getElementById("yibiao1")
@@ -953,7 +965,8 @@ export default {
         ],
       };
       myChart.setOption(option, true);
-    },
+    },//绘制仪表盘1，用于更新
+
     drawGauge2() {
       let myChart = echarts.getInstanceByDom(
         document.getElementById("yibiao2")
@@ -1005,7 +1018,8 @@ export default {
         ],
       };
       myChart.setOption(option, true);
-    },
+    },//绘制仪表盘1，用于更新
+
     drawGauge3() {
       let myChart = echarts.getInstanceByDom(
         document.getElementById("yibiao3")
@@ -1057,11 +1071,12 @@ export default {
         ],
       };
       myChart.setOption(option, true);
-    },
+    },//绘制仪表盘1，用于更新
+
     handleClose(done) {
       //执行修改操作
       done(); //关闭
-    },
+    },//用于关闭设置模态框
   },
 
   created() {
