@@ -471,15 +471,9 @@ export default {
         url: "http://10.22.104.89:49823/api/DbComm/GetHisData",
         data: {
           tags: [
-            // "data\\tag1.Name",
             "data\\tag1.PV",
-            // "data\\tag1.DESC",
-            // "data\\tag2.Name",
             "data\\tag2.PV",
-            // "data\\tag2.DESC",
-            // "data\\tag3.Name",
             "data\\tag3.PV",
-            // "data\\tag3.DESC",
           ],
           stime: t[0],
           etime: t[1],
@@ -556,12 +550,23 @@ export default {
         for (let index = 0; index < arr.length; index +=3) {
           for (let i = 0; i < arr1.length; i++) {
             let x = {
-              col1: `tag${index+1}`,
-              col2: arr[index + 1][i],
-              col3: arr[index + 2][i],
+              col1: `tag1`,
+              col2: arr[index][i],
+              col3: '测试点1',
             };
-            console.log(x)
+            let y = {
+              col1: `tag2`,
+              col2: arr[index + 1][i],
+              col3: '测试点1',
+            };
+            let z = {
+              col1: `tag3`,
+              col2: arr[index + 2][i],
+              col3: '测试点1',
+            };            
             this.tableData.push(x)
+            this.tableData.push(y)
+            this.tableData.push(z)
           }
         }
       }
