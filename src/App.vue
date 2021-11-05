@@ -245,20 +245,20 @@
               highlight-current-row
             >
               <el-table-column
-                prop="date"
+                prop="col1"
                 label="贡献度"
                 width="150"
                 align="center"
               >
               </el-table-column>
               <el-table-column
-                prop="name"
+                prop="col2"
                 label="当前值"
                 width="150"
                 align="center"
               >
               </el-table-column>
-              <el-table-column prop="address" label="描述" align="center">
+              <el-table-column prop="col3" label="描述" align="center">
               </el-table-column>
             </el-table>
           </div>
