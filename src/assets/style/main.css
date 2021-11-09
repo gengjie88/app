@@ -1,0 +1,182 @@
+#body {
+    background-image: url(../img/Bg3.png);
+    /* background-repeat: 'no-repeat'; */
+    width: 1920px;
+}
+
+#head {
+    height: 117px;
+    display: flex;
+    background-image: url(../img/title.png);
+}
+
+#companyName {
+    width: 400px;
+    text-align: left;
+    line-height: 50px;
+}
+
+#center {
+    flex: 1;
+    text-align: center;
+    line-height: 90px;
+    margin-left: -3%;
+}
+
+#dateAndTime {
+    width: 200px;
+    line-height: 30px;
+}
+
+#logo {
+    width: 200px;
+    text-align: right;
+    line-height: 50px;
+}
+
+.timeSpan {
+    color: white;
+    font-size: 16px;
+}
+
+#content {
+    height: 900px;
+    widows: 100%;
+    display: flex;
+}
+
+#contentLeft {
+    width: 600px;
+    height: 500px;
+    text-align: left;
+    line-height: 50px;
+}
+
+#contentRight {
+    width: 600px;
+    height: 500px;
+    text-align: left;
+    line-height: 50px;
+}
+
+#contentCenter {
+    flex: 1;
+    text-align: center;
+}
+
+#myChart {
+    width: 495px;
+    height: 495px;
+    margin: 0 auto;
+    background-image: url(../img/DL_15T.png);
+    margin-top: 5px;
+}
+
+#leftTop {
+    width: 600px;
+    height: 500px;
+    text-align: left;
+    line-height: 50px;
+    background-image: url(../img/border.png);
+}
+
+#leftBottom {
+    width: 600px;
+    height: 250px;
+    text-align: left;
+    line-height: 50px;
+    background-image: url(../img/border1.png);
+}
+
+#rightTop {
+    width: 600px;
+    height: 500px;
+    text-align: left;
+    line-height: 50px;
+    background-image: url(../img/border.png);
+}
+
+#rightBottom {
+    width: 600px;
+    height: 250px;
+    text-align: left;
+    line-height: 50px;
+    background-image: url(../img/border1.png);
+}
+
+#cont {
+    width: 300px;
+    height: 40px;
+    background-image: url(../img/XBT.png);
+    margin: 0 auto;
+    margin-top: 5px;
+}
+
+#cont1 {
+    margin-top: 5px;
+    width: 600px;
+    height: 60px;
+    margin: 0 auto;
+    border-radius: 10px;
+    text-align: left;
+    border: solid 1px darkblue;
+}
+
+#xx1 {
+    height: auto;
+    text-align: center;
+    margin-top: 5px;
+}
+
+#xx2 {
+    height: auto;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.tab {
+    width: 300px;
+    height: 40px;
+    background-image: url(../img/XBT.png);
+    text-align: center;
+    margin: 0 auto;
+    line-height: 40px;
+    color: white;
+}
+
+#zhutu1 {
+    height: 300px;
+}
+
+#zhutu2 {
+    height: 300px;
+}
+
+#yibiao {
+    display: flex;
+    align-content: center;
+}
+
+#yibiao1 {
+    width: 300px;
+    height: 250px;
+    margin-top: -10%;
+}
+
+#yibiao2 {
+    height: 250px;
+    width: 300px;
+    margin-top: -10%;
+}
+
+#yibiao_1 {
+    display: flex;
+    align-content: center;
+}
+
+#yibiao3 {
+    width: 300px;
+    height: 250px;
+    margin-top: -10%;
+    margin-left: 25%;
+}
